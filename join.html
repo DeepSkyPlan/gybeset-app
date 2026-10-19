@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gybeset — Team beitreten</title>
+<style>
+  :root { --ink:#0f2433; --dim:#4c6779; --bg:#edf3f6; --line:#d2dfe7; --accent:#0b5d87; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#e5eff5; --dim:#93acbc; --bg:#07121a; --line:#1d3647; --accent:#55b6e2; } }
+  body { font: 17px/1.5 -apple-system, system-ui, sans-serif; max-width: 520px; margin: 40px auto; padding: 0 16px; color: var(--ink); background: var(--bg); text-align: center; }
+  h1 { font-size: 1.8rem; margin: .2em 0; letter-spacing: .02em; } .dim { color: var(--dim); }
+  .code { font: 700 2.4rem ui-monospace, Menlo, monospace; letter-spacing: .12em; margin: .4em 0; }
+  a.btn { display: block; margin: 24px 0 12px; padding: 14px; border-radius: 14px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<p class="dim">Gybeset · Einladung / Invitation</p>
+<h1 id="team">TEAM</h1>
+<p class="dim" id="club"></p>
+<div class="code" id="code"></div>
+<a class="btn" id="open" href="#">In Gybeset öffnen · Open in Gybeset</a>
+<p class="dim">Gybeset noch nicht installiert? Erst die App laden, dann diesen Link noch einmal antippen — oder in der App
+„Team beitreten“ wählen und den Code eingeben.<br><br>Not installed yet? Get the app, then tap this link again — or choose
+“Join team” in the app and enter the code.</p>
+<script>
+  const q = new URLSearchParams(location.search);
+  const code = (q.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  const club = (q.get('club') || '').toUpperCase(), team = (q.get('team') || '').toUpperCase(), helm = q.get('helm') || '';
+  document.getElementById('team').textContent = (team || 'TEAM') + (helm ? ' / ' + helm : '');
+  document.getElementById('club').textContent = club;
+  document.getElementById('code').textContent = code.slice(0, 3) + ' ' + code.slice(3);
+  const app = 'gybeset://join?' + new URLSearchParams(Object.assign({ c: code, club, team }, helm ? { helm } : {})).toString();
+  document.getElementById('open').href = app;
+  if (code.length === 6) setTimeout(() => { location.href = app; }, 300);
+</script>
+</body>
+</html>
