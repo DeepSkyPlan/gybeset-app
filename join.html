@@ -20,8 +20,8 @@
 <div class="code" id="code"></div>
 <a class="btn" id="open" href="#">In Gybeset öffnen · Open in Gybeset</a>
 <p class="dim">Gybeset noch nicht installiert? Erst die App laden, dann diesen Link noch einmal antippen — oder in der App
-„Team beitreten“ wählen und den Code eingeben.<br><br>Not installed yet? Get the app, then tap this link again — or choose
-“Join team” in the app and enter the code.</p>
+„Mit Code beitreten“ wählen und den Code eingeben.<br><br>Not installed yet? Get the app, then tap this link again — or choose
+“Join with code” in the app and enter the code.</p>
 <script>
   const q = new URLSearchParams(location.search);
   const $ = (id) => document.getElementById(id);
@@ -56,9 +56,18 @@
   document.getElementById('team').textContent = (team || 'TEAM') + (helm ? ' / ' + helm : '');
   document.getElementById('club').textContent = club;
   document.getElementById('code').textContent = code.slice(0, 3) + ' ' + code.slice(3);
-  const app = 'gybeset://join?' + new URLSearchParams(Object.assign({ c: code, club, team }, helm ? { helm } : {})).toString();
+  // Link läuft nach 7 Tagen ab (exp = Unix-Zeit); der Code nicht. Links ohne exp gelten weiter.
+  const exp = parseInt(q.get('exp') || '', 10);
+  if (exp > 0 && Date.now() / 1000 > exp) {
+    $('open').style.display = 'none';
+    document.querySelector('p.dim:last-of-type').innerHTML =
+      '<b>Einladung abgelaufen</b> — bitte um eine neue oder gib in Gybeset unter „Mit Code beitreten“ den Code ein.' +
+      '<br><br><b>Invitation expired</b> — ask for a new one or enter the code in Gybeset under “Join with code”.';
+  } else {
+  const app = 'gybeset://join?' + new URLSearchParams(Object.assign({ c: code, club, team }, helm ? { helm } : {}, exp > 0 ? { exp } : {})).toString();
   document.getElementById('open').href = app;
   if (code.length === 6) setTimeout(() => { location.href = app; }, 300);
+  }
   }
 </script>
 </body>
