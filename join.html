@@ -24,7 +24,34 @@
 “Join team” in the app and enter the code.</p>
 <script>
   const q = new URLSearchParams(location.search);
-  const code = (q.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  const $ = (id) => document.getElementById(id);
+  // Fantasy League: ?f=<CODE> (beitreten) → gybeset://fantasy?c=…; ?t=<payload> (Tipp) → gybeset://tip?t=…
+  const f = (q.get('f') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+  const t = (q.get('t') || '').replace(/[^A-Za-z0-9_-]/g, '');
+  if (f || t) {
+    document.title = 'Gybeset — Fantasy League';
+    let app, title = 'Fantasy League', sub = '';
+    if (t) {
+      app = 'gybeset://tip?t=' + t;
+      try {
+        const p = JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/')))));
+        title = 'Tipp · Tip: ' + (p.t || '');
+        sub = (p.r > 0 ? 'R' + p.r : 'Gesamt · Overall') + (p.n ? ' – ' + p.n : '') + ' · ' + (p.c || '');
+      } catch (e) { title = 'Tipp · Tip'; }
+    } else {
+      app = 'gybeset://fantasy?c=' + f;
+      sub = 'Beitreten · Join';
+      $('code').textContent = f;
+    }
+    $('team').textContent = title;
+    $('club').textContent = sub;
+    $('open').href = app;
+    document.querySelector('p.dim:last-of-type').innerHTML = t
+      ? 'Für den Spielleiter: In Gybeset öffnen übernimmt den Tipp. Maßgeblich ist die Zeit der Nachricht.<br><br>For the game master: open in Gybeset to take over the tip. The time of the message counts.'
+      : 'Gybeset noch nicht installiert? Erst die App laden, dann diesen Link noch einmal antippen — oder in der App unter Liga › Fantasy League „Fantasy League beitreten“ wählen und den Code eingeben.<br><br>Not installed yet? Get the app, then tap this link again — or choose “Join Fantasy League” in the app and enter the code.';
+    setTimeout(() => { location.href = app; }, 300);
+  } else {
+  const code =(q.get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
   const club = (q.get('club') || '').toUpperCase(), team = (q.get('team') || '').toUpperCase(), helm = q.get('helm') || '';
   document.getElementById('team').textContent = (team || 'TEAM') + (helm ? ' / ' + helm : '');
   document.getElementById('club').textContent = club;
@@ -32,6 +59,7 @@
   const app = 'gybeset://join?' + new URLSearchParams(Object.assign({ c: code, club, team }, helm ? { helm } : {})).toString();
   document.getElementById('open').href = app;
   if (code.length === 6) setTimeout(() => { location.href = app; }, 300);
+  }
 </script>
 </body>
 </html>
